@@ -40,6 +40,18 @@ impdb system/manager@orcl directory=dump_dir dumpfile=full.dmp full=y;
 5)追加数据
 impdp system/manager@orcl directory=dump_dir dumpfile=expdp.dmp schemas=systemtable_exists_action
 
-
+4.Oracle导出txt
+（1）main.sql：
+set linesize 200 
+set term off verify off feedback off pagesize 999 
+set markup html on entmap ON spool on preformat off
+spool ./tables.txt
+@./get_tables.sql
+spool off
+exit
+（2）get_tables.sql:
+select table_name from all_tables where table_name like '%CWBASE%';
+（3）执行：
+sqlplus / as sysdba @./main.sql
 
 
