@@ -10,12 +10,17 @@ vim /home/oracle/.bash_profile
 alias sqlplus='rlwrap sqlplus'  
 alias rman='rlwrap rman' 
 ### 3.Oracle数据导出
-:   1.创建目录
-> mkdir dataImp  
+
+* 1.创建目录
+ 
+ >mkdir dataImp  
 chown -R oracle:oinstall dataImp
 create directory impdp_dir as '/u01/dataImp';
-grant read,write on directory impdp_dir to 【用户名】;
-:   2.导出
+grant read,write on directory impdp_dir to 用户名;
+
+
+* 2.导出
+
 >1)导出Schema
 expdp scott/tiger@orcl schemas=scott dumpfile=expdp.dmp directory=dump_dir; 
 2)导出表
@@ -27,8 +32,8 @@ expdp system/manager@orcl directory=dump_dir dumpfile=tablespace.dmptablespaces=
 5)导整个数据库
 expdp system/manager@orcl directory=dump_dir dumpfile=full.dmp full=y;
 
-:   3.导入
-> 1)导入用户（从用户scott导入到用户scott）
+* 3.导入
+>1)导入用户（从用户scott导入到用户scott）
 impdp scott/tiger@orcl directory=dump_dir dumpfile=expdp.dmp schemas=scott;
 2)导入表（从scott用户中把表dept和emp导入到system用户中）
 impdp system/manager@orcl directory=dump_dir dumpfile=expdp.dmptables=scott.dept,scott.emp remap_schema=scott:system;
@@ -39,8 +44,8 @@ impdb system/manager@orcl directory=dump_dir dumpfile=full.dmp full=y;
 5)追加数据
 impdp system/manager@orcl directory=dump_dir dumpfile=expdp.dmp schemas=systemtable_exists_action
 ### 4.Oracle导出txt
-:  1.main.sql：
-> set linesize 200 
+* 1.main.sql：
+>set linesize 200 
 set term off verify off feedback off pagesize 999 
 set markup html on entmap ON spool on preformat off
 spool ./tables.txt
@@ -48,7 +53,7 @@ spool ./tables.txt
 spool off
 exit
 
-: 2.get_tables.sql:
+* 2.get_tables.sql:
 > select table_name from all_tables where table_name like '%CWBASE%';
-: 3.执行
+* 3.执行
 > sqlplus / as sysdba @./main.sql
