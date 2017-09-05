@@ -30,3 +30,4 @@ liya = rw
 caojikun = rw
 6.启动服务器
 svnserve -d -r /data/svn/repos/
+通过svn://服务器IP/mmbx/就可以checkout
