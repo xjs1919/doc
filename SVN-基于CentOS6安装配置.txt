@@ -1,0 +1,32 @@
+参考：http://www.cnblogs.com/vijayfly/p/5711962.html
+1.安装服务器软件
+yum -y install subversion
+2.创建仓库
+mkdir -p /data/svn/repos/mmbx
+svnadmin create /data/svn/repos/mmbx
+3.修改配置
+cd  /data/svn/repos/mmbx/conf
+vim svnserve.conf
+[general]
+anon-access = none
+auth-access = write
+password-db = passwd
+authz-db = authz
+4.添加用户信息
+vi passwd
+[users]
+xujiashuai = xujiashuai
+yinyudong = yinyudong
+zhangwenlong = zhangwenlong
+liya = liya
+caojikun = caojikun
+5.添加权限信息
+vi authz
+[mmbx:/]
+xujiashuai = rw
+yinyudong = rw
+zhangwenlong = rw
+liya = rw
+caojikun = rw
+6.启动服务器
+svnserve -d -r /data/svn/repos/
