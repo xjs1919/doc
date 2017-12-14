@@ -1,0 +1,10 @@
+1.关闭拼写检查：
+settings - inspections - spelling
+2.关闭代码折叠
+settings - general - Code Folding
+3.关闭参数名提示
+settings-general-- appearance - show parameter name
+4.不打开上一次的工程
+setting-appearance&behavior-reopen last project on startup
+5.自定义syso
+setitng-editor-code style-live templates
