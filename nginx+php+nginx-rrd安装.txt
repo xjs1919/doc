@@ -1,25 +1,32 @@
-1.°²×°ngix
-ĞŞ¸ÄyumÔ´
+1.å®‰è£…ngix
+ä¿®æ”¹yumæº
 [root@localhost local]# cat  /etc/yum.repos.d/nginx.repo
 [nginx]
 name=nginx repo
 baseurl=http://nginx.org/packages/centos/7/$basearch/
 gpgcheck=0
 enabled=1
-°²×°£ºyum install nginx -y
+å®‰è£…ï¼šyum install nginx -y
+æ·»åŠ çŠ¶æ€ç›‘æ§ï¼š
+location = /nginx_status {
+            stub_status on;
+            access_log off;
+            allow 127.0.0.1;
+            deny all;
+}
 
-2.°²×°php
+2.å®‰è£…php
 yum install php php-gd  php-soap php-mbstring php-xmlrpc php-dom php-fpm -y
 
-3.nginxÕûºÏphp-fpm
-ĞŞ¸Ä/etc/php-fpm.d/www.confÎÄ¼şÖĞµÄuserºÍgroup£¬Óënginx.confÖĞµÄuserÒ»ÖÂ¡£
+3.nginxæ•´åˆphp-fpm
+ä¿®æ”¹/etc/php-fpm.d/www.confæ–‡ä»¶ä¸­çš„userå’Œgroupï¼Œä¸nginx.confä¸­çš„userä¸€è‡´ã€‚
 user = nginx
 group = nginx
 
-4.Æô¶¯php-fpm·şÎñ 
+4.å¯åŠ¨php-fpmæœåŠ¡ 
 systemctl start php-fpm
 
-5.ĞŞ¸ÄnginxµÄÅäÖÃ
+5.ä¿®æ”¹nginxçš„é…ç½®
 location ~ \.php$ {
         root /usr/share/nginx/html;
         fastcgi_pass 127.0.0.1:9000;
@@ -28,39 +35,39 @@ location ~ \.php$ {
         include fastcgi_params;
 }
 
-6.ÖØÆônginx 
+6.é‡å¯nginx 
 nginx -s reload
 
-7.±àĞ´index.php
+7.ç¼–å†™index.php
 [root@localhost php]# pwd
 /usr/share/nginx/html
 [root@localhost php]# cat index.php 
 <?php phpinfo(); ?>
 
-8.´ò¿ªä¯ÀÀÆ÷·ÃÎÊ£ºhttp://10.110.3.80/index.php
+8.æ‰“å¼€æµè§ˆå™¨è®¿é—®ï¼šhttp://10.110.3.80/index.php
 
-9.°²×°rddtoolÏà¹ØÒÀÀµ
+9.å®‰è£…rddtoolç›¸å…³ä¾èµ–
 yum install perl rrdtool perl-libwww-perl libwww-perl perl-rrdtool -y
  
-10.°²×°nginx-rdd
+10.å®‰è£…nginx-rdd
 wget http://soft.vpser.net/status/nginx-rrd/nginx-rrd-0.1.4.tgz
 tar zxvf nginx-rrd-0.1.4.tgz
 cd nginx-rrd-0.1.4
-cp usr/sbin/* /usr/sbin #¸´ÖÆÖ÷³ÌĞòÎÄ¼şµ½ /usr/sbin ÏÂ
-cp etc/nginx-rrd.conf /etc #¸´ÖÆÅäÖÃÎÄ¼şµ½ /etc ÏÂ
+cp usr/sbin/* /usr/sbin #å¤åˆ¶ä¸»ç¨‹åºæ–‡ä»¶åˆ° /usr/sbin ä¸‹
+cp etc/nginx-rrd.conf /etc #å¤åˆ¶é…ç½®æ–‡ä»¶åˆ° /etc ä¸‹
 cp html/index.php  /usr/share/nginx/html/ 
 
-11. ĞŞ¸ÄÅäÖÃvi /etc/nginx-rrd.conf
+11. ä¿®æ”¹é…ç½®vi /etc/nginx-rrd.conf
 RRD_DIR="/usr/share/nginx/html/nginx-rrd";
 WWW_DIR="/usr/share/nginx/html/";
 
-13. ĞÂ½¨¶¨Ê±ÈÎÎñ
+13. æ–°å»ºå®šæ—¶ä»»åŠ¡
 [root@localhost html]# crontab -l
 *  *    * * *   /bin/sh    /usr/sbin/nginx-collect
 */1 *   * * *  /bin/sh    /usr/sbin/nginx-graph
-²é¿´ÈÎÎñ£º
+æŸ¥çœ‹ä»»åŠ¡ï¼š
 tail -f /var/log/cron
 
-14. abÑ¹²â£º
-°²×°abÑ¹²â¹¤¾ß£ºyum -y install httpd-tools
+14. abå‹æµ‹ï¼š
+å®‰è£…abå‹æµ‹å·¥å…·ï¼šyum -y install httpd-tools
 ab -n 10000 -c 10 http://127.0.0.1/index.html
