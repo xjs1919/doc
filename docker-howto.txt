@@ -51,4 +51,28 @@ curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compos
 chmod +x /usr/local/bin/docker-compose
 docker-compose --version 
 
+容器编排 swarm
+（1）创建manager节点：
+docker swarm  init --advertise-addr=192.168.220.137
+（2）添加worker
+docker swarm join --token SWMTKN-1-0zh4mvzicujwwebg64vmxcfcjwzwanbujptimjomc7ixxi3h1a-44p4vpi97ee0zqk1z9adkf80b 192.168.220.137:2377
+docker node ls #查看节点信息
+（3）创建overlay的网络
+docker network create -d overlay demo 
+docker network ls #查看，另外两台上是没有这个network的
+（4）开启防火墙
+[root@docker-ce ~]# firewall-cmd --add-port 2377/tcp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 7946/tcp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 7946/udp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 4789/udp --permanent
+[root@docker-ce ~]# systemctl restart firewalld
+其中包括通信的tcp的2377端口，tcp和udp的7946端口，还有网络overlay的udp端口4789端口。
+（5）创建mysql的service
+docker service create --name mysql       --network demo --env MYSQL_ROOT_PASSWORD=root --env MYSQL_DATABASE=wordpress --mount type=volume,source=mysql-data,destination=/var/lib/mysql mysql:5.7
+（6）创建wordpress的service
+docker service create --name wordpress --network demo --env WORDPRESS_DB_HOST=mysql --env WORDPRESS_DB_USER=root --env WORDPRESS_DB_PASSWORD=root -p 80:80 wordpress
+WORDPRESS_DB_HOST的值是mysql的那个service
+
+
+
 
