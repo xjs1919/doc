@@ -46,6 +46,14 @@ docker pull 192.168.220.146:5000/hello_world
 {"bip":"172.17.0.1/16"}
 systemctl restart docker
 
+单机多容器互联--link
+安装mysql5.7:
+docker run -d --name mysql -v mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress mysql:5.7
+安装wordpress：
+docker run -d --link=mysql --name wordpress -e WORDPRESS_DB_HOST=mysql:3306 -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=root -p 8080:80 wordpress
+
+单机compose互联：
+
 docker-compose安装：
 curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
