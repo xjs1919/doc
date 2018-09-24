@@ -81,6 +81,16 @@ docker service create --name mysql       --network demo --env MYSQL_ROOT_PASSWOR
 docker service create --name wordpress --network demo --env WORDPRESS_DB_HOST=mysql --env WORDPRESS_DB_USER=root --env WORDPRESS_DB_PASSWORD=root -p 80:80 wordpress
 WORDPRESS_DB_HOST的值是mysql的那个service
 
+导入导出
+导入导出容器：
+docker export 3944c2defae1 > aa.tar
+docker import  aa.tar nginx:v2
+导入导出镜像：
+docker save nginx:v2 > nginx_v2.tar
+docker rmi nginx:v2 
+docker load -i nginx_v2.tar
+
+
 
 
 
