@@ -41,4 +41,12 @@ service docker restart
 docker rmi 192.168.220.146:5000/hello_world 
 docker pull 192.168.220.146:5000/hello_world 
 
+修改docker0默认ip
+可以用编辑/etc/docker/daemon.json文件，添加内容 "bip": "ip/netmask" [ 切勿与宿主机同网段 ]
+{"bip":"172.17.0.1/16"}
+systemctl restart docker
+
+单机多容器 --link
+多机 overlay网络 swarm
+
 
