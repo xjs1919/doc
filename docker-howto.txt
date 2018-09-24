@@ -1,4 +1,4 @@
-ɾ���ϵ�docker
+删除老的docker
 yum remove docker \
                   docker-client \
                   docker-client-latest \
@@ -9,16 +9,36 @@ yum remove docker \
                   docker-selinux \
                   docker-engine-selinux \
                   docker-engine
-��װ����
+安装依赖
 yum install -y yum-utils device-mapper-persistent-data  lvm2
-#������yumԴ
+#阿里云yum源
 yum-config-manager --add-repo  http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-#docker�ٷ�yumԴ
+#docker官方yum源
 yum-config-manager  --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
-��װdocker ce
+安装docker ce
 yum install docker-ce -y
-��������
+开机启动
 systemctl enable docker
 systemctl restart docker
+
+如何搭建私有的registry
+docker pull registry 
+docker run -d -p 5000:5000 --restart always --name registry registry
+在另一个机器上：
+docker build -t 192.168.220.146:5000/hello_world .
+注意：镜像的名字tag
+docker push 192.168.220.146:5000/hello_world #上传镜像
+报错：
+Get https://192.168.220.146:5000/v2/: http: server gave HTTP response to HTTPS client
+vi /etc/docker/daemon.json
+{"insecure-registries":["192.168.220.146:5000"]}
+vi /lib/systemd/system/docker.service 
+添加：EnvironmentFile=/etc/docker/daemon.json
+service docker restart
+验证：
+（1）wget http://192.168.220.146:5000/v2/_catalog 可以查看到
+（2）先删掉，再拉取
+docker rmi 192.168.220.146:5000/hello_world 
+docker pull 192.168.220.146:5000/hello_world 
 
 
