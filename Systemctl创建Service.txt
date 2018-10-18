@@ -1,0 +1,31 @@
+cd /usr/lib/systemd/system
+vi nginx.service
+
+[Unit]
+Description=nginx - high performance web server
+Documentation=http://nginx.org/en/docs/
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/usr/local/nginx/logs/nginx.pid
+ExecStartPre=/usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf
+ExecStart=/usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+设置开机自启动：
+systemctl enable nginx.service
+systemctl start nginx.service
+systemctl stop nginx.service
+systemctl restart nginx.service
+修改service文件重新加载（有时候不好使）：
+systemctl  daemon-reload
+
+参考：https://www.cnblogs.com/saneri/p/7778756.html
+
+
