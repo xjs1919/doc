@@ -1,4 +1,4 @@
-ɾ���ϵ�docker
+删除老的docker
 yum remove docker \
                   docker-client \
                   docker-client-latest \
@@ -9,16 +9,88 @@ yum remove docker \
                   docker-selinux \
                   docker-engine-selinux \
                   docker-engine
-��װ����
+安装依赖
 yum install -y yum-utils device-mapper-persistent-data  lvm2
-#������yumԴ
+#阿里云yum源
 yum-config-manager --add-repo  http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
-#docker�ٷ�yumԴ
+#docker官方yum源
 yum-config-manager  --add-repo  https://download.docker.com/linux/centos/docker-ce.repo
-��װdocker ce
+安装docker ce
 yum install docker-ce -y
-��������
+开机启动
 systemctl enable docker
 systemctl restart docker
+
+如何搭建私有的registry
+docker pull registry 
+docker run -d -p 5000:5000 --restart always --name registry registry
+在另一个机器上：
+docker build -t 192.168.220.146:5000/hello_world .
+注意：镜像的名字tag
+docker push 192.168.220.146:5000/hello_world #上传镜像
+报错：
+Get https://192.168.220.146:5000/v2/: http: server gave HTTP response to HTTPS client
+vi /etc/docker/daemon.json
+{"insecure-registries":["192.168.220.146:5000"]}
+vi /lib/systemd/system/docker.service 
+添加：EnvironmentFile=/etc/docker/daemon.json
+service docker restart
+验证：
+（1）wget http://192.168.220.146:5000/v2/_catalog 可以查看到
+（2）先删掉，再拉取
+docker rmi 192.168.220.146:5000/hello_world 
+docker pull 192.168.220.146:5000/hello_world 
+
+修改docker0默认ip
+可以用编辑/etc/docker/daemon.json文件，添加内容 "bip": "ip/netmask" [ 切勿与宿主机同网段 ]
+{"bip":"172.17.0.1/16"}
+systemctl restart docker
+
+单机多容器互联--link
+安装mysql5.7:
+docker run -d --name mysql -v mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress mysql:5.7
+安装wordpress：
+docker run -d --link=mysql --name wordpress -e WORDPRESS_DB_HOST=mysql:3306 -e WORDPRESS_DB_USER=root -e WORDPRESS_DB_PASSWORD=root -p 8080:80 wordpress
+
+单机compose互联：
+
+docker-compose安装：
+curl -L https://github.com/docker/compose/releases/download/1.16.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+docker-compose --version 
+
+容器编排 swarm
+（1）创建manager节点：
+docker swarm  init --advertise-addr=192.168.220.137
+（2）添加worker
+docker swarm join --token SWMTKN-1-0zh4mvzicujwwebg64vmxcfcjwzwanbujptimjomc7ixxi3h1a-44p4vpi97ee0zqk1z9adkf80b 192.168.220.137:2377
+docker node ls #查看节点信息
+（3）创建overlay的网络
+docker network create -d overlay demo 
+docker network ls #查看，另外两台上是没有这个network的
+（4）开启防火墙
+[root@docker-ce ~]# firewall-cmd --add-port 2377/tcp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 7946/tcp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 7946/udp --permanent
+[root@docker-ce ~]# firewall-cmd --add-port 4789/udp --permanent
+[root@docker-ce ~]# systemctl restart firewalld
+其中包括通信的tcp的2377端口，tcp和udp的7946端口，还有网络overlay的udp端口4789端口。
+（5）创建mysql的service
+docker service create --name mysql       --network demo --env MYSQL_ROOT_PASSWORD=root --env MYSQL_DATABASE=wordpress --mount type=volume,source=mysql-data,destination=/var/lib/mysql mysql:5.7
+（6）创建wordpress的service
+docker service create --name wordpress --network demo --env WORDPRESS_DB_HOST=mysql --env WORDPRESS_DB_USER=root --env WORDPRESS_DB_PASSWORD=root -p 80:80 wordpress
+WORDPRESS_DB_HOST的值是mysql的那个service
+
+导入导出
+导入导出容器：
+docker export 3944c2defae1 > aa.tar
+docker import  aa.tar nginx:v2
+导入导出镜像：
+docker save nginx:v2 > nginx_v2.tar
+docker rmi nginx:v2 
+docker load -i nginx_v2.tar
+
+
+
 
 
