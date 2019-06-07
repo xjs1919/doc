@@ -1,3 +1,6 @@
+## 微信扫一扫关注公众号：爪哇优太儿
+![扫一扫加关注](https://img-blog.csdnimg.cn/20190524100820287.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2dvbGRlbmZpc2gxOTE5,size_16,color_FFFFFF,t_7)
+
 ## 1.EmEditor删除空行
 > 正则替换：^[\s\t]*\n
 ## 2.Oracle SQLPlus上下左右删除乱码
