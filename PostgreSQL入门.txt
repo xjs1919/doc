@@ -1,0 +1,55 @@
+CentOS7下
+
+安装PostgreSQL：https://www.postgresql.org/download/linux/redhat/
+#安装yum源文件
+yum install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+#安装client
+yum install postgresql10
+#安装server
+yum install postgresql10-server
+
+配置PostgreSQL：https://blog.csdn.net/sunbocong/article/details/78212709
+#初始化数据库
+/usr/pgsql-10/bin/postgresql-10-setup initdb
+#开机自启动
+systemctl enable postgresql-10
+systemctl start postgresql-10
+
+postgres用户初始配置
+安装完成后，操作系统会自动创建一个postgres用户用来管理数据库，为其初始化密码：
+[root@localhost ~]# passwd postgres 
+输入密码
+切换至postgres用户，发现提示符设置有问题，编辑之：
+[root@localhost ~]# su - postgres
+-bash-4.2$ vim ./.bash_profile
+改为如下配置：s
+[ -f /etc/profile ] && source /etc/profile
+PGDATA=/var/lib/pgsql/9.6/data
+export PGDATA
+# If you want to customize your settings,
+# Use the file below. This is not overridden
+# by the RPMS.
+[ -f /var/lib/pgsql/.pgsql_profile ] && source /var/lib/pgsql/.pgsql_profile
+
+export PS1='[\u@\h \W]\$'
+
+使配置生效，看起来清爽多了
+-bash-4.2$ source ./.bash_profile 
+[postgres@localhost ~]$
+
+数据库初始配置
+使用数据库自带的postgres用户登录数据库,并为其赋予密码
+[postgres@localhost ~]$psql -U postgres
+psql (9.6.5)
+Type "help" for help.
+
+postgres=# alter user postgres with password '123456';
+ALTER ROLE
+
+常用命令：
+create database mydb; 创建数据库
+drop database mydb; 删除数据库
+postgres=# \l 列出所有的库
+\c mydb; -- 选择mydb数据库，注意\c是小写
+mydb=> \q 退出psql
+select * from pg_tables where schemaname = 'public'; 列出库中的表

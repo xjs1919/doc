@@ -1,0 +1,69 @@
+192.168.220.139服务器 192.168.220.153客户端
+
+在139上：
+关闭SELinux和防火墙等：
+[root@localhost ~]# setenforce 0
+[root@localhost ~]# systemctl stop firewalld
+[root@localhost ~]# systemctl disable firewalld.service
+安装服务端软件
+[root@localhost ~]# yum install -y nfs-utils
+启动服务：
+[root@localhost ~]# service rpcbind start
+[root@localhost ~]# service nfs start
+注意这里的启动顺序是先启动rpcbind,再启动nfs。关闭先关nfs,先关rpcbind。
+创建共享目录
+[root@localhost ~]# mkdir /share
+[root@localhost ~]# touch /share/hello.txt
+[root@localhost ~]# vi  /share/hello.txt
+hello，nfs！
+配置共享目录的权限
+[root@localhost ~]# chown -R  nfsnobody:nfsnobody /share
+[root@localhost ~]# vi /etc/exports
+/share 192.168.220.1/24(rw,sync,all_squash,insecure)
+
+ro                   该主机对该共享目录有只读权限
+rw          该主机对该共享目录有只写权限
+root_squash     客户机用root用户访问该共享文件夹时，将root用户映射成匿名用户
+all_squash         客户机上的任何用户访问该共享目录时都映射成匿名用户
+anonuid将客户机上的用户映射成指定的本地用户ID的用户
+anongid将客户机上的用户映射成属于指定的本地用户组ID
+sync资料同步写入到内存与硬盘中
+async资料会先暂存于内存中，而非直接写入硬盘
+secure限制客户端只能从小于1021的tcp/ip端口连接nfs服务器
+
+重新加载nfs配置文件
+[root@localhost ~]# exportfs -rv
+开启nsf服务并设为开机自启动
+[root@localhost ~]# systemctl start nfs-server.service
+[root@localhost ~]# systemctl enable nfs-server.service
+检查一下
+[root@localhost share]# exportfs -rv
+exporting 192.168.220.1/24:/share
+[root@localhost share]# showmount -e 127.0.0.1
+Export list for 127.0.0.1:
+/share 192.168.220.1/24
+[root@localhost share]# 
+
+配置接收端
+在153上：
+[root@localhost ~]# yum install nfs-utils -y
+启动nfs-utils设为开机自启动
+[root@localhost ~]# systemctl start nfs-utils
+[root@localhost ~]#  systemctl enable nfs-utils
+查看下服务端的共享目录
+[root@localhost ~]# showmount -e 192.168.220.139
+Export list for 192.168.220.139:
+/share 192.168.1.1/24
+创建共享目录
+[root@localhost ~]# mkdir /share
+[root@localhost ~]# chown -R  nfsnobody:nfsnobody /share
+挂载共享目录：
+[root@localhost share]# mount -t nfs 192.168.220.139:/share /share
+卸载：
+[root@localhost share]# umount -l  /share
+
+参考：
+https://www.cnblogs.com/maoxianfei/p/9014068.html
+https://blog.51cto.com/vqiao/1609123
+https://blog.51cto.com/kangxi/2115250
+
