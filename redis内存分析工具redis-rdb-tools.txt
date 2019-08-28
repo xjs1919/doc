@@ -1,0 +1,23 @@
+https://github.com/sripathikrishnan/redis-rdb-tools
+RDB 是 Redis 默认的持久化方案。在指定的时间间隔内，执行指定次数的写操作，则会将内存中的数据写入到磁盘中。即在指定目录下生成一个dump.rdb文件。Redis 重启会通过加载dump.rdb文件恢复数据。redis-rdb-tools是由Python写的用来分析Redis的rdb快照文件用的工具，它可以把rdb快照文件生成json文件或者生成报表用来分析Redis的使用详情、使用标准的diff工具比较两个dump文件，是比较实用的工具。注意事项：非常占用内存和cpu，需要避开高峰期或者迁移至其他服务器。
+
+(1)安装
+wget https://github.com/sripathikrishnan/redis-rdb-tools.git
+unzip redis-rdb-tools-master.zip
+cd redis-rdb-tools-master/
+python setup.py install
+pip install python-lzf  可以加快导出csv的速度
+
+(2)转换dump文件到JSON
+#解析dump文件并以JSON格式标准输出
+rdb --command json /usr/local/redis-cluster/clusterconf/dump-show.rdb  
+#只解析符合正则的keys
+rdb --command json --key "key.*" /usr/local/redis-cluster/clusterconf/dump-show.rdb
+
+(3)生成内存报告
+rdb -c memory /usr/local/redis-cluster/clusterconf/dump-show.rdb > redis_memory_report.csv
+rdb -c memory /usr/local/redis-cluster/clusterconf/dump-show.rdb --bytes 128 -f memory.csv 大于128字节
+
+(4)查看某个key的内存使用情况
+redis-memory-for-key getProductIdByDeviceId::431053009304
+redis-memory-for-key -s localhost -p 6379 -a mypassword getProductIdByDeviceId::431053009304
