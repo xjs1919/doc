@@ -59,3 +59,11 @@ select table_name from all_tables where table_name like '%CWBASE%';
 ```sql
 sqlplus / as sysdba @./main.sql
 ```
+
+## 4.windows杀进程
+```sh
+#查找进程id
+netstat -nao | findstr 2181 
+# 强制杀掉
+taskkill /pid 6284 /F
+```
