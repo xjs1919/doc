@@ -1,0 +1,87 @@
+1.安装Sonatype-Nexus的docker镜像
+github地址：https://github.com/sonatype/docker-nexus3
+mkdir -p /usr/local/nexus-data
+chown -R 200 /usr/local/nexus-data
+docker run -d -p 8081:8081 -p 8082:8082 --name nexus  -v /usr/local/nexus-data:/nexus-data  sonatype/nexus3
+8081是nexus3的web界面，8082端口是暴露出来让docker客户端访问私有镜像仓库，上传docker镜像所使用
+安装过程需要好几分钟，docker logs 容器id进行查看
+
+2.浏览器访问http://192.168.81.129:8081
+从/usr/local/nexus-data/admin.password中读取admin的初始密码，登陆系统，修改admin的密码。
+
+3.创建docker仓库
+点击顶部配置图标，切到配置页面，左侧菜单选Repositories, 打开仓库配置，点击Create repository 创建仓库。
+类型选：docker-hosted
+名称：docker-registry
+启用http端口8082
+可以看到仓库的地址是：http://192.168.81.129:8081/repository/docker-registry/
+
+4.客户端docker配置
+docker仓库默认需要https支持，但nexus没有配ssl,需要将服务器加到insecure-registries。
+vim /etc/docker/daemon.json
+{
+  "registry-mirrors": ["https://registry.docker-cn.com"],
+  "insecure-registries":["192.168.81.129:8082"]
+}
+重启docker服务：
+systemctl daemon-reload
+service docker restart
+
+5.命令行推送镜像
+docker build -t 192.168.81.129:8082/docker-demo
+docker login 192.168.81.129:8082
+admin
+123456
+
+6.集成docker-maven-plugin
+
+创建springboot工程docker-demo，在/src/main/docker/下面添加Dockerfile，
+vi Dockerfile
+FROM java:8
+ADD *.jar /app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+在工程的pom中添加docker-maven-plugin：
+<plugin>
+	<groupId>com.spotify</groupId>
+	<artifactId>docker-maven-plugin</artifactId>
+	<version>0.4.12</version>
+	<executions>
+		<execution>
+			<id>build-image</id>
+			<phase>package</phase>
+			<goals>
+				<goal>build</goal>
+			</goals>
+		</execution>
+	</executions>
+	<configuration>
+		<imageName>192.168.81.129:8082/docker-demo</imageName>
+		<dockerDirectory>${project.basedir}/src/main/docker</dockerDirectory>
+		<resources>
+			<resource>
+				<targetPath>/</targetPath>
+				<directory>${project.build.directory}</directory>
+				<include>${project.build.finalName}.jar</include>
+			</resource>
+		</resources>
+		<serverId>docker-registry</serverId>
+	</configuration>
+</plugin>
+在settings.xml中添加：
+<server>
+      <id>docker-registry</id>
+      <username>admin</username>
+      <password>123456</password>
+      <configuration>
+        <email>admin@example.org</email>
+      </configuration>
+   </server>
+注意这里的docker-registry，pom.xml中和settings.xml中要保持一致。
+
+命令行执行：mvn clean package -DpushImage -DskipTests
+就可以把docker镜像推送到Sonatype-Nexus上面。
+
+
+
