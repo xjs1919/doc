@@ -1,0 +1,12 @@
+mysql解压版安装
+
+1.以管理员身份运行->cmd
+2.运行命令：mysqld --initialize，会在mysql的解压目录下生成一个data目录
+3.在data目录下面找到后缀是.err的文件，里面有root的密码
+4.命令行输入mysqld，启动mysql服务
+5.客户端输入mysql -uroot -p 进入mysql命令行
+6.在mysql命令行输入ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';修改root密码
+
+如果想做成系统服务：
+安装MySQL服务： mysqld --install mysql8.0
+启动mysql服务：net start mysql8.0
