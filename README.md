@@ -70,3 +70,7 @@ taskkill /pid 6284 /F
 ## sql相关
     表的所有字段都必须有默认值
     如果是给已经存在的表添加字段，则新添加的字段的默认值最好不要跟字段的值有重合，便于区分新老数据，比如：添加gender，取值为0和1，default设置为-1。
+    mysql group by and order by null
+    默认情况下，如果只有group by col，那么结果将会按照col进行升序排序，也就是说，mysql会导致默认的排序，这个对性能是有影响的，注意！
+    如果确定不需要排序，那么可以加上group by col order by null，这样就不会导致排序。但有列外情况：假如col字段上有索引，那么即使加上order by null,其查出来的结果仍然是按照col排序的，相当于使用了索引覆盖，注意！
+
