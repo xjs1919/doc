@@ -1,0 +1,71 @@
+1.insert
+<insert id="insert" parameterType="com.github.xjs.Entity">
+        insert into entity
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null">id,</if>
+            <if test="creatorId != null">creator_id,</if>
+            <if test="creatorName != null">creator_name,</if>
+            <if test="updaterId != null">updater_id,</if>
+            <if test="updaterName != null">updater_name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," > 
+            <if test="id != null">#{id},</if>
+            <if test="creatorId != null">#{creatorId},</if>
+            <if test="creatorName != null">#{creatorName},</if>
+            <if test="updaterId != null">#{updaterId},</if>
+            <if test="updaterName != null">#{updaterName},</if>
+        </trim>
+    </insert>
+
+2. insert batch
+<insert id="insertBasicBatch">
+        insert into entity(id, creator_id,creator_name,updater_id,updater_name)
+        values
+        <foreach collection ="list" item="item" separator =",">
+            (
+            #{item.id},  #{item.creatorId},#{item.creatorName}, #{item.updaterId},#{item.updaterName}
+            )
+        </foreach >
+    </insert>
+
+3.update
+<update id="update" parameterType="com.github.xjs.Entity">
+        update entity
+        <set>
+            <if test="updaterId != null">updater_id = #{updaterId},</if>
+            <if test="updaterName != null">updater_name = #{updaterName},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+4.update batch
+<update id="updateBatch">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update entity
+            <set>
+                <if test="item.updaterId != null">updater_id = #{item.updaterId},</if>
+                <if test="item.updaterName != null">updater_name = #{item.updaterName},</if>
+            </set>
+            where id = #{item.id}
+        </foreach>
+</update>
+
+5.in
+<select id="selectByOutletIds" resultType="com.github.xjs.Entity">
+        select <include refid="allColumn" />
+        from entity
+        where id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+6.like
+<select id="searchTotal" resultType="java.lang.Integer">
+        select count(*)
+        from entity
+        where 1=1
+        <if test="name != null">
+            and name like concat('%', #{name}, '%')
+        </if>
+    </select>
