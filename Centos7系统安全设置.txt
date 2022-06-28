@@ -1,0 +1,63 @@
+1.系统口令复杂度及策略配置
+cp /etc/login.defs /etc/login.defs.bak
+vi /etc/login.defs
+PASS_MAX_DAYS   90
+PASS_MIN_DAYS   2
+PASS_MIN_LEN    8
+PASS_WARN_AGE   7
+
+
+cp /etc/security/pwquality.conf /etc/security/pwquality.conf.bak
+vi /etc/security/pwquality.conf 
+retry=3
+minlen=8
+difok=3
+ucredit=-1
+lcredit=-2
+dcredit=-1
+ocredit=-1
+
+
+2.系统未配置登录失败处理功能和超时自动退出时间功能。
+
+锁定通过tty终端登录的用户
+cp /etc/pam.d/login /etc/pam.d/login.bak
+vi /etc/pam.d/login
+auth required pam_tally2.so deny=6 unlock_time=600 even_deny_root root_unlock_time=600 per_user reset
+
+锁定通过ssh协议登录的用户
+cp /etc/pam.d/sshd /etc/pam.d/sshd.bak
+vi /etc/pam.d/sshd
+auth required pam_tally2.so deny=6 unlock_time=600 even_deny_root root_unlock_time=600 per_user reset
+
+设置超时时间
+cp /etc/profile /etc/profile.bak
+vi /etc/profile
+export TIMOUT=300
+
+3. 禁止root用户ssh登录
+
+先添加一个用户
+adduser xujiashuai
+passwd xujiashuai
+chmod -v u+w /etc/sudoers  
+cp  /etc/sudoers /etc/sudoers.bak
+vi  /etc/sudoers
+xujiashuai  ALL=(ALL) ALL
+收回写权限：
+chmod -v u-w /etc/sudoers
+#使用xujiashuai账号登陆后，在命令前加 sudo 则是使用root权限了
+sudo XXXX
+
+禁止root登录
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+vi /etc/ssh/sshd_config
+PermitRootLogin no
+
+重启sshd
+systemctl restart sshd
+
+
+
+
+
